@@ -210,10 +210,12 @@ echo implode(' * ', $entries), ' = ', array_product($entries);
 
 function getEntriesOfSum(int $sum, array $numCollection) {
     $entries = [];
+    $numCollectionForIterating = $numCollection;
+    array_pop($numCollectionForIterating);
 
-    foreach ($numCollection as $num) {
+    foreach ($numCollectionForIterating as $index => $num) {
         $target = $sum - $num;
-        $keyOfTarget = array_search($target, $numCollection, true);
+        $keyOfTarget = array_search($target, array_slice($numCollection, $index + 1), true);
 
         if ($keyOfTarget !== false) {
             $entries = [$num, $target];
