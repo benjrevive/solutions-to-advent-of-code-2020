@@ -1,7 +1,5 @@
 <?php
 
-define('NUM_OF_COLUMN_SHIFT', 3);
-
 $mapPattern = [
     '......#..........##......#.####',
     '.##...###....#.....#...#.#.....',
@@ -327,17 +325,49 @@ $mapPattern = [
     '.......#.#....#............#..#',
     '.#..##.#.######...#...#......#.'
 ];
-$patternWidth = strlen($mapPattern[0]);
-$patternHeight = count($mapPattern);
-$columnNum = 0;
-$numOfTrees = 0;
+$numOfColumnShift = 3;
+$numOfRowShift = 1;
+$numOfTrees = countNumOfTrees($mapPattern, [$numOfColumnShift, $numOfRowShift]);
+echo 'part 1: ', $numOfTrees, PHP_EOL;
 
-for ($rowNum = 1; $rowNum < $patternHeight; $rowNum++) {
-    $columnNum = ($columnNum + NUM_OF_COLUMN_SHIFT) % $patternWidth;
-    
-    if (substr($mapPattern[$rowNum], $columnNum, 1) === '#') {
-        $numOfTrees++;
-    }
+$columnAndRowShiftNumCollection = [
+    [1, 1],
+    [3, 1],
+    [5, 1],
+    [7, 1],
+    [1, 2],
+];
+$numOfTreesCollection = [];
+
+foreach ($columnAndRowShiftNumCollection as $numOfColumnAndRowShift) {
+    $numOfTreesCollection[] = countNumOfTrees($mapPattern, $numOfColumnAndRowShift);
 }
 
-echo $numOfTrees;
+echo 'part 2: ', implode(' * ', $numOfTreesCollection), ' = ', array_product($numOfTreesCollection);
+
+/**
+ * @param string[] $mapPattern
+ * @param int[] $numOfColumnAndRowShift
+ */
+function countNumOfTrees(
+    array $mapPattern,
+    array $numOfColumnAndRowShift
+): int {
+    $patternWidth = strlen($mapPattern[0]);
+    $patternHeight = count($mapPattern);
+    $columnNum = 0;
+    $rowNum = $numOfColumnAndRowShift[1];
+    $numOfTrees = 0;
+
+    while ($rowNum < $patternHeight) {
+        $columnNum = ($columnNum + $numOfColumnAndRowShift[0]) % $patternWidth;
+        
+        if (substr($mapPattern[$rowNum], $columnNum, 1) === '#') {
+            $numOfTrees++;
+        }
+
+        $rowNum += $numOfColumnAndRowShift[1];
+    }
+
+    return $numOfTrees;
+}
