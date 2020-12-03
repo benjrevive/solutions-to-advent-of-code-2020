@@ -2,6 +2,7 @@
 
 // https://adventofcode.com/2020/day/1
 
+define('MIN_NUM_OF_ENTRIES', 2);
 $numCollection = [
     1977,
     1515,
@@ -205,22 +206,40 @@ $numCollection = [
     1888
 ];
 $sum = 2020;
-$entries = getEntriesOfSum($sum, $numCollection);
-echo implode(' * ', $entries), ' = ', array_product($entries);
+$entriesOfPartOne = getEntriesOfSum($sum, $numCollection);
+echo 'part 1: ', implode(' * ', $entriesOfPartOne), ' = ', array_product($entriesOfPartOne);
+$entriesOfPartTwo = getEntriesOfSum($sum, $numCollection, 3);
+echo PHP_EOL, 'part 2: ', implode(' * ', $entriesOfPartTwo), ' = ', array_product($entriesOfPartTwo);
 
-function getEntriesOfSum(int $sum, array $numCollection) {
+function getEntriesOfSum(int $sum, array $numCollection, int $numOfEntries = MIN_NUM_OF_ENTRIES): array
+{
+    if ($numOfEntries < MIN_NUM_OF_ENTRIES) {
+        throw new Exception('The number of entries must be equal to or greater than ' . MIN_NUM_OF_ENTRIES);
+    }
+
     $entries = [];
     $numCollectionForIterating = $numCollection;
     array_pop($numCollectionForIterating);
 
     foreach ($numCollectionForIterating as $index => $num) {
-        $target = $sum - $num;
-        $keyOfTarget = array_search($target, array_slice($numCollection, $index + 1), true);
+        $difference = $sum - $num;
 
-        if ($keyOfTarget !== false) {
-            $entries = [$num, $target];
-            break;
+        if ($numOfEntries === MIN_NUM_OF_ENTRIES) {
+            $keyOfTarget = array_search($difference, array_slice($numCollection, $index + 1), true);
+
+            if ($keyOfTarget !== false) {
+                $entries = [$num, $difference];
+                break;
+            }
+        } else {
+            $otherEntries = getEntriesOfSum($difference, $numCollection, $numOfEntries - 1);
+
+            if (!empty($otherEntries)) {
+                $entries = [$num, ...$otherEntries];
+                break;
+            }
         }
+        
     }
 
     return $entries;
