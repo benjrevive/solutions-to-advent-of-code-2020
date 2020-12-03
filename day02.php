@@ -1003,53 +1003,57 @@ $dataCollection = [
     '8-9 w: wwwwwwwxww'
 ];
 $partOneAnswer = 0;
-
-foreach ($dataCollection as $dataRow) {
-    $matches = splitPasswdData($dataRow);
-    $lowerBound = $matches[1];
-    $upperBound = $matches[2];
-    $char = $matches[3];
-    $passwd = $matches[4];
-    $patternOfPasswd = '/' . $char . '/';
-    $matchCount = preg_match_all($patternOfPasswd, $passwd);
-
-    if (!is_int($matchCount)) {
-        throw new Exception('Matching error.');
-        return;
-    }
-
-    if ($lowerBound <= $matchCount && $matchCount <= $upperBound) {
-        $partOneAnswer++;
-    }
-}
-
-echo 'part 1: ', $partOneAnswer;
-
 $partTwoAnswer = 0;
 
 foreach ($dataCollection as $dataRow) {
     $matches = splitPasswdData($dataRow);
-    $firstPosition = $matches[1];
-    $secondPosition = $matches[2];
+    $lowerBound = $firstPosition = $matches[1];
+    $upperBound = $secondPosition = $matches[2];
     $char = $matches[3];
     $passwd = $matches[4];
+    
+    $partOneCheckResult = checkForPolicyOne($lowerBound, $upperBound, $char, $passwd);
 
-    if (substr($passwd, $firstPosition - 1, 1) === $char xor substr($passwd, $secondPosition - 1, 1) === $char) {
+    if ($partOneCheckResult === true) {
+        $partOneAnswer++;
+    }
+
+    $partTwoCheckResult = checkForPolicyTwo($firstPosition, $secondPosition, $char, $passwd);
+
+    if ($partTwoCheckResult === true) {
         $partTwoAnswer++;
     }
 }
 
-echo PHP_EOL, 'part 2: ', $partTwoAnswer;
+echo 'part 1: ', $partOneAnswer, PHP_EOL;
+echo 'part 2: ', $partTwoAnswer;
 
-function splitPasswdData (string $passwdData) {
+function splitPasswdData (string $passwdData): array
+{
     $patternOfDataRow = '/(\d+)-(\d+) ([a-z]): ([a-z]+)/';
     $matches = [];
     $matchResult = preg_match($patternOfDataRow, $passwdData, $matches);
 
     if ($matchResult !== 1) {
         throw new Exception('String does not match the pattern.');
-        return;
     }
 
     return $matches;
+}
+
+function checkForPolicyOne ($lowerBound, $upperBound, $char, $passwd): bool
+{
+    $patternOfPasswd = '/' . $char . '/';
+    $matchCount = preg_match_all($patternOfPasswd, $passwd);
+
+    if (!is_int($matchCount)) {
+        throw new Exception('Matching error.');
+    }
+
+    return $lowerBound <= $matchCount && $matchCount <= $upperBound;
+}
+
+function checkForPolicyTwo ($firstPosition, $secondPosition, $char, $passwd): bool
+{
+    return substr($passwd, $firstPosition - 1, 1) === $char xor substr($passwd, $secondPosition - 1, 1) === $char;
 }
