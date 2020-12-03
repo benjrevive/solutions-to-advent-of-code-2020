@@ -1002,18 +1002,10 @@ $dataCollection = [
     '7-8 d: ddddwddddj',
     '8-9 w: wwwwwwwxww'
 ];
-$answer = 0;
+$partOneAnswer = 0;
 
 foreach ($dataCollection as $dataRow) {
-    $patternOfDataRow = '/(\d+)-(\d+) ([a-z]): ([a-z]+)/';
-    $matches = [];
-    $matchResult = preg_match($patternOfDataRow, $dataRow, $matches);
-
-    if ($matchResult !== 1) {
-        throw new Exception('String does not match the pattern.');
-        return;
-    }
-
+    $matches = splitPasswdData($dataRow);
     $lowerBound = $matches[1];
     $upperBound = $matches[2];
     $char = $matches[3];
@@ -1027,8 +1019,37 @@ foreach ($dataCollection as $dataRow) {
     }
 
     if ($lowerBound <= $matchCount && $matchCount <= $upperBound) {
-        $answer++;
+        $partOneAnswer++;
     }
 }
 
-echo $answer;
+echo 'part 1: ', $partOneAnswer;
+
+$partTwoAnswer = 0;
+
+foreach ($dataCollection as $dataRow) {
+    $matches = splitPasswdData($dataRow);
+    $firstPosition = $matches[1];
+    $secondPosition = $matches[2];
+    $char = $matches[3];
+    $passwd = $matches[4];
+
+    if (substr($passwd, $firstPosition - 1, 1) === $char xor substr($passwd, $secondPosition - 1, 1) === $char) {
+        $partTwoAnswer++;
+    }
+}
+
+echo PHP_EOL, 'part 2: ', $partTwoAnswer;
+
+function splitPasswdData (string $passwdData) {
+    $patternOfDataRow = '/(\d+)-(\d+) ([a-z]): ([a-z]+)/';
+    $matches = [];
+    $matchResult = preg_match($patternOfDataRow, $passwdData, $matches);
+
+    if ($matchResult !== 1) {
+        throw new Exception('String does not match the pattern.');
+        return;
+    }
+
+    return $matches;
+}
